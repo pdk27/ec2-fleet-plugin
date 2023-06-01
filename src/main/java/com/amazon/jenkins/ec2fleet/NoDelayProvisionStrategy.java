@@ -84,10 +84,10 @@ public class NoDelayProvisionStrategy extends NodeProvisioner.Strategy {
         if (excessWorkload > 0) {
             LOGGER.log(Level.FINE, "Provisioning not complete, consulting remaining strategies");
             return NodeProvisioner.StrategyDecision.CONSULT_REMAINING_STRATEGIES;
-        } else {
-            LOGGER.log(Level.FINE, "Provisioning completed");
-            return NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED;
         }
+
+        LOGGER.log(Level.FINE, "Provisioning completed");
+        return NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED;
     }
 
     // Visible for testing
