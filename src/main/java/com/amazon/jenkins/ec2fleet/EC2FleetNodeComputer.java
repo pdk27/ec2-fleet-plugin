@@ -8,20 +8,22 @@ import org.kohsuke.stapler.HttpResponse;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
- * @see EC2FleetNode
- * @see EC2FleetAutoResubmitComputerLauncher
+ * The {@link EC2FleetNodeComputer} represents the running state of {@link EC2FleetNode} that holds executors.
+ * @see {@link hudson.model.Computer}
  */
 @ThreadSafe
 public class EC2FleetNodeComputer extends SlaveComputer implements EC2FleetCloudAware {
+    private static final Logger LOGGER = Logger.getLogger(EC2FleetNodeComputer.class.getName());
 
     private final String name;
     private volatile AbstractEC2FleetCloud cloud;
     private boolean isMarkedForDeletion;
 
-    public EC2FleetNodeComputer(final Slave slave, @Nonnull final String name, @Nonnull final AbstractEC2FleetCloud cloud) {
-        super(slave);
+    public EC2FleetNodeComputer(final Slave agent, @Nonnull final String name, @Nonnull final AbstractEC2FleetCloud cloud) {
+        super(agent);
         this.name = name;
         this.cloud = cloud;
         this.isMarkedForDeletion = false;
