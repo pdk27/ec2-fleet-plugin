@@ -1,7 +1,9 @@
 package com.amazon.jenkins.ec2fleet;
 
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleet;
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
+import com.amazon.jenkins.ec2fleet.aws.EC2Api;
+import com.amazon.jenkins.ec2fleet.aws.Registry;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleet;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;

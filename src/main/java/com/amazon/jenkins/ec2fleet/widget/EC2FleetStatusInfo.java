@@ -1,5 +1,6 @@
-package com.amazon.jenkins.ec2fleet;
+package com.amazon.jenkins.ec2fleet.widget;
 
+import com.amazon.jenkins.ec2fleet.CloudNanny;
 import hudson.widgets.Widget;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -11,7 +12,7 @@ import java.util.Objects;
  * if you change fields name
  *
  * @see EC2FleetStatusWidget
- * @see CloudNanny
+ * @see com.amazon.jenkins.ec2fleet.CloudNanny
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 @ThreadSafe

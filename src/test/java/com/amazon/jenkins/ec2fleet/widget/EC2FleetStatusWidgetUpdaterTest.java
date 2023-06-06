@@ -1,5 +1,7 @@
-package com.amazon.jenkins.ec2fleet;
+package com.amazon.jenkins.ec2fleet.widget;
 
+import com.amazon.jenkins.ec2fleet.EC2FleetCloud;
+import com.amazon.jenkins.ec2fleet.FleetStateStats;
 import hudson.slaves.Cloud;
 import hudson.widgets.Widget;
 import org.junit.Before;

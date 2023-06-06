@@ -1,4 +1,6 @@
-package com.amazon.jenkins.ec2fleet;
+package com.amazon.jenkins.ec2fleet.aws;
+
+import com.amazon.jenkins.ec2fleet.EC2FleetCloud;
 
 /**
  * Decouple plugin code from dependencies for easy testing. We cannot just make transient fields

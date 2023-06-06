@@ -1,11 +1,13 @@
 package com.amazon.jenkins.ec2fleet;
 
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
-import com.amazon.jenkins.ec2fleet.fleet.EC2SpotFleet;
-import com.amazon.jenkins.ec2fleet.utils.AwsPermissionChecker;
+import com.amazon.jenkins.ec2fleet.aws.CloudFormationApi;
+import com.amazon.jenkins.ec2fleet.aws.EC2Api;
+import com.amazon.jenkins.ec2fleet.aws.Registry;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2SpotFleet;
+import com.amazon.jenkins.ec2fleet.aws.AwsPermissionChecker;
 import com.amazon.jenkins.ec2fleet.utils.EC2FleetCloudAwareUtils;
-import com.amazon.jenkins.ec2fleet.utils.JenkinsUtils;
-import com.amazon.jenkins.ec2fleet.utils.RegionHelper;
+import com.amazon.jenkins.ec2fleet.aws.RegionHelper;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;

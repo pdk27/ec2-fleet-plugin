@@ -1,8 +1,11 @@
 package com.amazon.jenkins.ec2fleet;
 
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleet;
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
-import com.amazon.jenkins.ec2fleet.fleet.EC2SpotFleet;
+import com.amazon.jenkins.ec2fleet.aws.CloudFormationApi;
+import com.amazon.jenkins.ec2fleet.aws.EC2Api;
+import com.amazon.jenkins.ec2fleet.aws.Registry;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleet;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2SpotFleet;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;

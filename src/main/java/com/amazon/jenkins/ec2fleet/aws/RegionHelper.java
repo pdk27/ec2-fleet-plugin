@@ -1,6 +1,5 @@
-package com.amazon.jenkins.ec2fleet.utils;
+package com.amazon.jenkins.ec2fleet.aws;
 
-import com.amazon.jenkins.ec2fleet.Registry;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;

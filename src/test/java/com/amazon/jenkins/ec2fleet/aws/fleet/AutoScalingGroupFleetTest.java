@@ -1,4 +1,4 @@
-package com.amazon.jenkins.ec2fleet.fleet;
+package com.amazon.jenkins.ec2fleet.aws.fleet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.amazon.jenkins.ec2fleet.FleetStateStats;
-import com.amazon.jenkins.ec2fleet.utils.AWSUtils;
+import com.amazon.jenkins.ec2fleet.aws.AWSUtils;
+import com.amazon.jenkins.ec2fleet.aws.fleet.AutoScalingGroupFleet;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;

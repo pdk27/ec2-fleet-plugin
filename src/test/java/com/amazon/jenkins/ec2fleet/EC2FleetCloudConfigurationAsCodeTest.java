@@ -1,7 +1,7 @@
 package com.amazon.jenkins.ec2fleet;
 
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleet;
-import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleet;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
 import hudson.plugins.sshslaves.SSHConnector;
 import hudson.plugins.sshslaves.verifiers.NonVerifyingKeyVerificationStrategy;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
