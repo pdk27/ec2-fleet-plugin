@@ -64,7 +64,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
     public static final String EC2_INSTANCE_TAG_NAMESPACE = "ec2-fleet-plugin";
     public static final String EC2_INSTANCE_CLOUD_NAME_TAG = EC2_INSTANCE_TAG_NAMESPACE + ":cloud-name";
 
-    public static final String FLEET_CLOUD_ID = "FleetCloudLabel";
+    public static final String DEFAULT_FLEET_CLOUD_ID = "FleetCloudLabel";
 
     public static final int DEFAULT_CLOUD_STATUS_INTERVAL_SEC = 10;
 
@@ -143,7 +143,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
                               final Integer cloudStatusIntervalSec,
                               final boolean noDelayProvision,
                               final String ec2KeyPairName) {
-        super(StringUtils.isBlank(name) ? FLEET_CLOUD_ID : name);
+        super(StringUtils.isBlank(name) ? DEFAULT_FLEET_CLOUD_ID : name);
         init();
         this.awsCredentialsId = awsCredentialsId;
         this.region = region;
@@ -652,7 +652,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
                 computerConnector.launch(address, TaskListener.NULL));
         final Node.Mode nodeMode = restrictUsage ? Node.Mode.EXCLUSIVE : Node.Mode.NORMAL;
         //TODO: Add maxTotalUses to EC2FleetLabelCloud similar to EC2FleetCloud
-        final EC2FleetNode node = new EC2FleetNode(instanceId, "Fleet slave for " + instanceId,
+        final EC2FleetNode node = new EC2FleetNode(instanceId, "Fleet agent for " + instanceId,
                 effectiveFsRoot, effectiveNumExecutors, nodeMode, labelString, new ArrayList<NodeProperty<?>>(),
                 this, computerLauncher, -1);
 
