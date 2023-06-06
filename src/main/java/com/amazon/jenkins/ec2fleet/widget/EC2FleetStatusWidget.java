@@ -1,4 +1,4 @@
-package com.amazon.jenkins.ec2fleet;
+package com.amazon.jenkins.ec2fleet.widget;
 
 import hudson.Extension;
 import hudson.widgets.Widget;

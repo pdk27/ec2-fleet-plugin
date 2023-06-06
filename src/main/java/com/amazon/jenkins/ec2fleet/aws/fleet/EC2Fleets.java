@@ -1,4 +1,4 @@
-package com.amazon.jenkins.ec2fleet.fleet;
+package com.amazon.jenkins.ec2fleet.aws.fleet;
 
 import org.apache.commons.lang.StringUtils;
 

@@ -1,5 +1,7 @@
-package com.amazon.jenkins.ec2fleet;
+package com.amazon.jenkins.ec2fleet.widget;
 
+import com.amazon.jenkins.ec2fleet.EC2FleetCloud;
+import com.amazon.jenkins.ec2fleet.FleetStateStats;
 import hudson.Extension;
 import hudson.model.PeriodicWork;
 import hudson.slaves.Cloud;
@@ -10,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @see EC2FleetCloud
- * @see EC2FleetStatusWidget
+ * Responsible for updating {@link com.amazon.jenkins.ec2fleet.EC2FleetStatusWidget}
  */
 @Extension
 @SuppressWarnings("unused")

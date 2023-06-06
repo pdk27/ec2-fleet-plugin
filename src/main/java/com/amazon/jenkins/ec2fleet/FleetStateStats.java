@@ -1,5 +1,8 @@
 package com.amazon.jenkins.ec2fleet;
 
+import com.amazon.jenkins.ec2fleet.aws.fleet.AutoScalingGroupFleet;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleet;
+import com.amazon.jenkins.ec2fleet.aws.fleet.EC2SpotFleet;
 import com.amazonaws.services.ec2.model.BatchState;
 
 import javax.annotation.Nonnegative;
@@ -18,7 +21,7 @@ public final class FleetStateStats {
 
     /**
      * Abstract state of different implementation of
-     * {@link com.amazon.jenkins.ec2fleet.fleet.EC2Fleet}
+     * {@link EC2Fleet}
      */
     public static class State {
 
@@ -52,9 +55,9 @@ public final class FleetStateStats {
          * Is underline fleet is updating so we need to suppress update
          * until modification will be completed and fleet state will be stabilized.
          *
-         * This is important only for {@link com.amazon.jenkins.ec2fleet.fleet.EC2SpotFleet}
+         * This is important only for {@link EC2SpotFleet}
          * as it has delay between update request and actual update of target capacity, while
-         * {@link com.amazon.jenkins.ec2fleet.fleet.AutoScalingGroupFleet} does it in sync with
+         * {@link AutoScalingGroupFleet} does it in sync with
          * update call.
          *
          * Consumed by {@link EC2FleetCloud#update()}

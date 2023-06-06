@@ -1,4 +1,4 @@
-package com.amazon.jenkins.ec2fleet.fleet;
+package com.amazon.jenkins.ec2fleet.aws.fleet;
 
 import com.amazon.jenkins.ec2fleet.FleetStateStats;
 import hudson.util.ListBoxModel;
