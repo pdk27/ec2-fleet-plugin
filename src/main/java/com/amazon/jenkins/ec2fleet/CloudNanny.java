@@ -5,6 +5,7 @@ import hudson.model.PeriodicWork;
 import hudson.slaves.Cloud;
 import jenkins.model.Jenkins;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * {@link CloudNanny} is responsible for periodically running update (i.e. sync-state-with-AWS) cycles for {@link EC2FleetCloud}s.
@@ -38,7 +40,12 @@ public class CloudNanny extends PeriodicWork {
      */
     @Override
     protected void doRun() {
-        for (final Cloud cloud : getClouds()) {
+        List<Cloud> clouds = getClouds();
+        LOGGER.fine("In CloudNanny --> getClouds: " + clouds.stream().map(c -> c.getDisplayName() + " " + c).collect(Collectors.joining(",")));
+        LOGGER.fine("In CloudNanny --> getComputers: " + Arrays.stream(Jenkins.get().getComputers()).filter(c-> !c.getDisplayName().equals("master")).map(c -> c.getDisplayName() + "---" + c + "---" + ((EC2FleetNodeComputer)c).getCloud()).collect(Collectors.joining(",")));
+        LOGGER.fine("In CloudNanny --> getNodes: " + Jenkins.get().getNodes().stream().map(n -> n.getDisplayName() + "---" + n + "---" + ((EC2FleetNode)n).getCloud()).collect(Collectors.joining(",")));
+
+        for (final Cloud cloud : clouds) {
             if (!(cloud instanceof EC2FleetCloud)) continue;
             final EC2FleetCloud fleetCloud = (EC2FleetCloud) cloud;
 
@@ -52,6 +59,7 @@ public class CloudNanny extends PeriodicWork {
 
             try {
                 // Update the cluster states
+//                LOGGER.fine("In CloudNanny --> getClouds, updating cloud, cloud obj: " + cloud+ ", fleetCloud: " + cloud.getDisplayName() + ", old id:" + ((EC2FleetCloud) cloud).getOldId());
                 fleetCloud.update();
             } catch (Exception e) {
                 // could be a bad configuration or a real exception, we can't do too much here

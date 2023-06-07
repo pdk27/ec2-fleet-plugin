@@ -4,7 +4,6 @@ import com.amazon.jenkins.ec2fleet.aws.Registry;
 import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleet;
 import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
 import com.amazon.jenkins.ec2fleet.aws.AwsPermissionChecker;
-import com.amazon.jenkins.ec2fleet.utils.EC2FleetCloudAwareUtils;
 import com.amazon.jenkins.ec2fleet.aws.RegionHelper;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Instance;
@@ -85,24 +84,21 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
     private static final Logger LOGGER = Logger.getLogger(EC2FleetCloud.class.getName());
     private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
-    // Counter to keep track of planned nodes per EC2FleetCloud, used in node's display name
-    private transient AtomicInteger plannedNodeCounter = new AtomicInteger(1);
-
-    /**
-     * Provide unique identifier for this instance of {@link EC2FleetCloud}, <code>transient</code>
-     * will not be stored. Not available for customer, instead use {@link EC2FleetCloud#name}
-     * will be used only during Jenkins configuration update <code>config.jelly</code>,
-     * when new instance of same cloud is created and we need to find old instance and
-     * repoint resources like {@link Computer} {@link Node} etc.
-     * <p>
-     * It's lazy to support old versions which don't have this field at all.
-     * <p>
-     * However it's stable, as soon as it will be created and called first uuid will be same
-     * for all future calls to the same instances of lazy uuid.
-     *
-     * @see EC2FleetCloudAware
-     */
-    private transient LazyUuid id;
+//    /**
+//     * Provide unique identifier for this instance of {@link EC2FleetCloud}, <code>transient</code>
+//     * will not be stored. Not available for customer, instead use {@link EC2FleetCloud#name}
+//     * will be used only during Jenkins configuration update <code>config.jelly</code>,
+//     * when new instance of same cloud is created and we need to find old instance and
+//     * repoint resources like {@link Computer} {@link Node} etc.
+//     * <p>
+//     * It's lazy to support old versions which don't have this field at all.
+//     * <p>
+//     * However it's stable, as soon as it will be created and called first uuid will be same
+//     * for all future calls to the same instances of lazy uuid.
+//     *
+//     * @see EC2FleetCloudAware
+//     */
+//    private transient LazyUuid id;
 
     /**
      * Replaced with {@link EC2FleetCloud#awsCredentialsId}
@@ -175,11 +171,13 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
 
     private transient Set<NodeProvisioner.PlannedNode> plannedNodesCache;
 
-    private transient ArrayList<ScheduledFuture<?>> plannedNodeScheduledFutures;
+//    private transient ArrayList<ScheduledFuture<?>> plannedNodeScheduledFutures;
+
+    // Counter to keep track of planned nodes per EC2FleetCloud, used in node's display name
+    private transient AtomicInteger plannedNodeCounter = new AtomicInteger(1);
 
     @DataBoundConstructor
     public EC2FleetCloud(final String name,
-                         final String oldId,
                          final String awsCredentialsId,
                          final @Deprecated String credentialsId,
                          final String region,
@@ -234,14 +232,22 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         this.cloudStatusIntervalSec = cloudStatusIntervalSec;
         this.noDelayProvision = noDelayProvision;
 
+        LOGGER.fine("*** In EC2FleetCloud constructor for " + this.getDisplayName() +  " obj: " + this );
         if (fleet != null) {
             this.stats = EC2Fleets.get(fleet).getState(
                     getAwsCredentialsId(), region, endpoint, getFleet());
             // Reassign existing nodes/computer with new reference of cloud
-            EC2FleetCloudAwareUtils.reassign(fleet, this);
+//            EC2FleetCloudAwareUtils.reassign(fleet, this);
         }
     }
-
+    public static @Nonnull EC2FleetCloud getByName(@Nonnull String name) {
+        Cloud cloud = Jenkins.get().clouds.getByName(name);
+        if (!(cloud instanceof EC2FleetCloud)) {
+            throw new IllegalArgumentException(name + " is not an EC2 Fleet Cloud. Cloud found in Jenkins instance: " + cloud);
+        }
+        return (EC2FleetCloud) cloud;
+    }
+    
     public boolean isNoDelayProvision() {
         return noDelayProvision;
     }
@@ -253,15 +259,15 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         return StringUtils.isNotBlank(awsCredentialsId) ? awsCredentialsId : credentialsId;
     }
 
-    /**
-     * Called old as will be used by new instance of cloud, for
-     * which this id is old (not current)
-     *
-     * @return id of current cloud
-     */
-    public String getOldId() {
-        return id.getValue();
-    }
+//    /**
+//     * Called old as will be used by new instance of cloud, for
+//     * which this id is old (not current)
+//     *
+//     * @return id of current cloud
+//     */
+//    public String getOldId() {
+//        return id.getValue();
+//    }
 
     public boolean isDisableTaskResubmit() {
         return disableTaskResubmit;
@@ -292,7 +298,10 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         return endpoint;
     }
 
-    @Override
+    public int getMaxTotalUses() {
+        return maxTotalUses == null ? DEFAULT_MAX_TOTAL_USES : maxTotalUses;
+    }
+
     public String getFleet() {
         return fleet;
     }
@@ -358,13 +367,13 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         return plannedNodesCache;
     }
 
-    // Visible for testing
-    synchronized ArrayList<ScheduledFuture<?>> getPlannedNodeScheduledFutures() { return plannedNodeScheduledFutures; }
-
-    // Visible for testing
-    synchronized void setPlannedNodeScheduledFutures(final ArrayList<ScheduledFuture<?>> futures) {
-        this.plannedNodeScheduledFutures = futures;
-    }
+//    // Visible for testing
+//    synchronized ArrayList<ScheduledFuture<?>> getPlannedNodeScheduledFutures() { return plannedNodeScheduledFutures; }
+//
+//    // Visible for testing
+//    synchronized void setPlannedNodeScheduledFutures(final ArrayList<ScheduledFuture<?>> futures) {
+//        this.plannedNodeScheduledFutures = futures;
+//    }
 
     // Visible for testing
     synchronized Map<String, EC2AgentTerminationReason> getInstanceIdsToTerminate() {
@@ -413,6 +422,15 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
 
     @Override
     public synchronized Collection<NodeProvisioner.PlannedNode> provision(@Nonnull final Cloud.CloudState cloudState, final int excessWorkload) {
+        Jenkins jenkinsInstance = Jenkins.get();
+        if (jenkinsInstance.isQuietingDown()) {
+            LOGGER.log(Level.FINE, "Not provisioning nodes, Jenkins instance is quieting down");
+            return Collections.emptyList();
+        } else if (jenkinsInstance.isTerminating()) {
+            LOGGER.log(Level.FINE, "Not provisioning nodes, Jenkins instance is terminating");
+            return Collections.emptyList();
+        }
+
         fine("excessWorkload %s", excessWorkload);
 
         if (stats == null) {
@@ -459,21 +477,21 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             resultList.add(plannedNode);
             plannedNodesCache.add(plannedNode);
 
-            // create a ScheduledFuture that will cancel the planned node future after a timeout.
-            // This protects us from leaving planned nodes stranded within Jenkins NodeProvisioner when the Fleet
-            // is updated or removed before it can scale. After scaling, EC2FleetOnlineChecker will cancel the future
-            // if something happens to the Fleet.
-            final ScheduledFuture<?> scheduledFuture = EXECUTOR.schedule(() -> {
-                if (completableFuture.isDone()) {
-                    return;
-                }
-                info("Scaling timeout reached, removing node from Jenkins's plannedCapacitySnapshot");
-                // with complete(null) Jenkins will remove future from plannedCapacity without making a fuss
-                completableFuture.complete(null);
-                return;
-                },
-                getScheduledFutureTimeoutSec(), TimeUnit.SECONDS);
-            plannedNodeScheduledFutures.add(scheduledFuture);
+//            // create a ScheduledFuture that will cancel the planned node future after a timeout.
+//            // This protects us from leaving planned nodes stranded within Jenkins NodeProvisioner when the Fleet
+//            // is updated or removed before it can scale. After scaling, EC2FleetOnlineChecker will cancel the future
+//            // if something happens to the Fleet.
+//            final ScheduledFuture<?> scheduledFuture = EXECUTOR.schedule(() -> {
+//                if (completableFuture.isDone()) {
+//                    return;
+//                }
+//                info("Scaling timeout reached, removing node from Jenkins's plannedCapacitySnapshot");
+//                // with complete(null) Jenkins will remove future from plannedCapacity without making a fuss
+//                completableFuture.complete(null);
+//                return;
+//                },
+//                getScheduledFutureTimeoutSec(), TimeUnit.SECONDS);
+////            plannedNodeScheduledFutures.add(scheduledFuture);
         }
         return resultList;
     }
@@ -526,7 +544,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             fine("setting stats");
             stats = currentState;
 
-            removePlannedNodeScheduledFutures(currentToAdd);
+//            removePlannedNodeScheduledFutures(currentToAdd);
 
             // since data could be changed between two sync blocks we need to recalculate target capacity
             final int updatedTargetCapacity = Math.max(0,
@@ -562,23 +580,24 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         return filteredInstanceIdsToTerminate;
     }
 
-    public boolean removePlannedNodeScheduledFutures(final int numToRemove) {
-        if (numToRemove < 1) {
-            return false;
-        }
-        Iterator<ScheduledFuture<?>> iterator = plannedNodeScheduledFutures.iterator();
-        for (int i = 0; i < numToRemove; i++) {
-            if(!iterator.hasNext()){
-                fine("Expected a scheduled future to exist but no more are present");
-                return false;
-            }
-            ScheduledFuture<?> nextFuture = iterator.next();
-            nextFuture.cancel(true);
-            iterator.remove();
-        }
-        return true;
-    }
+//    public boolean removePlannedNodeScheduledFutures(final int numToRemove) {
+//        if (numToRemove < 1) {
+//            return false;
+//        }
+//        Iterator<ScheduledFuture<?>> iterator = plannedNodeScheduledFutures.iterator();
+//        for (int i = 0; i < numToRemove; i++) {
+//            if(!iterator.hasNext()){
+//                fine("Expected a scheduled future to exist but no more are present");
+//                return false;
+//            }
+//            ScheduledFuture<?> nextFuture = iterator.next();
+//            nextFuture.cancel(true);
+//            iterator.remove();
+//        }
+//        return true;
+//    }
 
+    // pdk: PLS RENAME doProvision??
     private FleetStateStats updateByState(
             final int currentToAdd, final Map<String, EC2AgentTerminationReason> currentInstanceIdsToTerminate, final FleetStateStats currentState) {
         final Jenkins jenkins = Jenkins.get();
@@ -638,7 +657,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
 
         final Set<String> jenkinsInstances = new HashSet<>();
         for (final Node node : jenkins.getNodes()) {
-            if (node instanceof EC2FleetNode && ((EC2FleetNode) node).getCloud().getFleet().equals(fleet)) {
+            if (node instanceof EC2FleetNode && ((EC2FleetCloud)((EC2FleetNode) node).getCloud()).getFleet().equals(fleet)) {
                 jenkinsInstances.add(node.getNodeName());
             }
         }
@@ -767,10 +786,11 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         return true;
     }
 
+    // pdk: remove wordy unnecessary logs
     @Override
     public boolean canProvision(final Cloud.CloudState cloudState) {
         final Label label = cloudState.getLabel();
-        fine("CanProvision called on fleet: \"" + this.labelString + "\" wanting: \"" + (label == null ? "(unspecified)" : label.getName()) + "\".");
+//        fine("CanProvision called on fleet: \"" + this.labelString + "\" wanting: \"" + (label == null ? "(unspecified)" : label.getName()) + "\".");
         if (fleet == null) {
             fine("Fleet/ASG for cloud is null, returning false");
             return false;
@@ -792,11 +812,11 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
     }
 
     private void init() {
-        id = new LazyUuid();
+//        id = new LazyUuid();
 
         plannedNodesCache = new HashSet<>();
         instanceIdsToTerminate = new HashMap<>();
-        plannedNodeScheduledFutures = new ArrayList<>();
+//        plannedNodeScheduledFutures = new ArrayList<>();)
     }
 
     private void removeNode(final String instanceId) {
@@ -857,11 +877,11 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
                 computerConnector.launch(address, TaskListener.NULL));
         final Node.Mode nodeMode = restrictUsage ? Node.Mode.EXCLUSIVE : Node.Mode.NORMAL;
         final EC2FleetNode node = new EC2FleetNode(instanceId, "Fleet agent for " + instanceId,
-                effectiveFsRoot, effectiveNumExecutors, nodeMode, labelString, new ArrayList<NodeProperty<?>>(),
-                this, computerLauncher, maxTotalUses);
+                effectiveFsRoot, effectiveNumExecutors, nodeMode, labelString, new EC2RetentionStrategy(),
+                new ArrayList<NodeProperty<?>>(), this.name, computerLauncher, maxTotalUses);
 
         // Initialize our retention strategy
-        node.setRetentionStrategy(new EC2RetentionStrategy());
+//        node.setRetentionStrategy(new EC2RetentionStrategy());
 
         final Jenkins jenkins = Jenkins.get();
         // jenkins automatically remove old node with same name if any
@@ -899,7 +919,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
                     }
 
                     // Do not count computer if it is not a part of the given fleet
-                    if (!Objects.equals(((EC2FleetNodeComputer) computer).getCloud().getFleet(), currentState.getFleetId())) {
+                    if (!Objects.equals(((EC2FleetCloud)((EC2FleetNodeComputer) computer).getCloud()).getFleet(), currentState.getFleetId())) {
                         continue;
                     }
                     currentBusyInstances++;
@@ -930,6 +950,11 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         LOGGER.log(Level.WARNING, getLogPrefix() + String.format(msg, args), t);
     }
 
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
     @Extension
     @SuppressWarnings("unused")
     public static class DescriptorImpl extends Descriptor<Cloud> {
@@ -937,6 +962,8 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         public DescriptorImpl() {
             super();
             load();
+
+            LOGGER.fine("In Cloud's DescriptorImpl constructor " + this); // called once when Jenkins start
         }
 
         @Override
@@ -1008,8 +1035,17 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         @Override
         public boolean configure(final StaplerRequest req, final JSONObject formData) throws FormException {
             req.bindJSON(this, formData);
+
+            LOGGER.fine("In Descriptor's configure for cloud " + this);
+            LOGGER.fine("Form data: " + formData.toString(2));
+            LOGGER.fine("Before saving config for FleetCloud " + this.getT().getName() + ", cloud object: " + this.getT());
             save();
-            return super.configure(req, formData);
+
+            LOGGER.fine("Descriptor's configure for cloud, After save " + this);
+            LOGGER.fine("Saved configuration for " + this + " ");
+            LOGGER.fine("cloud object: " + this.getT());
+
+            return super.configure(req, formData); // pdk , try removing ?? just return true?
         }
 
     }

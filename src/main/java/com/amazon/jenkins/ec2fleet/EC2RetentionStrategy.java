@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The {@link EC2RetentionStrategy} controls when to take {@link EC2FleetNodeComputer} offline, bring it back online, or even to destroy it.
+ * @see EC2FleetCloud
  */
 public class EC2RetentionStrategy extends RetentionStrategy<EC2FleetNodeComputer> implements ExecutorListener {
 
@@ -179,6 +179,8 @@ public class EC2RetentionStrategy extends RetentionStrategy<EC2FleetNodeComputer
                 final AbstractEC2FleetCloud cloud = ec2FleetNode.getCloud();
                 if (computer.countBusy() <= 1 && !computer.isAcceptingTasks()) {
                     LOGGER.info("Calling scheduleToTerminate for node " + ec2FleetNode.getNodeName() + " due to exhausted maxTotalUses.");
+                    LOGGER.fine(String.format("In RetentionStrategy postJobAction for node / cloud: ", cloud + " name: " + cloud.getDisplayName()));
+
                     // Schedule instance for termination even if it breaches minSize and minSpareSize constraints
                     cloud.scheduleToTerminate(ec2FleetNode.getNodeName(), true, EC2AgentTerminationReason.MAX_TOTAL_USES_EXHAUSTED);
                 }

@@ -1,7 +1,6 @@
 package com.amazon.jenkins.ec2fleet;
 
 import hudson.model.Queue;
-import hudson.model.Slave;
 import jenkins.model.Jenkins;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.when;
 public class EC2FleetNodeComputerTest {
 
     @Mock
-    private Slave slave;
+    private EC2FleetNode agent;
 
     @Mock
     private Jenkins jenkins;
@@ -38,26 +37,25 @@ public class EC2FleetNodeComputerTest {
         when(Jenkins.get()).thenReturn(jenkins);
         when(Queue.getInstance()).thenReturn(queue);
 
-        when(slave.getNumExecutors()).thenReturn(1);
+        when(agent.getNumExecutors()).thenReturn(1);
     }
 
     @Test
     public void getDisplayName_should_be_ok_with_init_null_cloud() {
-        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(slave, "a", null));
+        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(agent));
         Assert.assertEquals("unknown fleet a", computer.getDisplayName());
     }
 
     @Test
     public void getDisplayName_should_be_ok_with_set_null_cloud() {
-        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(slave, "a", cloud));
-        computer.setCloud(null);
+        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(agent));
         Assert.assertEquals("unknown fleet a", computer.getDisplayName());
     }
 
     @Test
     public void getDisplayName_returns_node_display_name() {
         when(cloud.getDisplayName()).thenReturn("a");
-        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(slave, "n", cloud));
+        EC2FleetNodeComputer computer = spy(new EC2FleetNodeComputer(agent));
         Assert.assertEquals("a n", computer.getDisplayName());
     }
 

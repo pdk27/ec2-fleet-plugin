@@ -41,8 +41,7 @@ public class EC2FleetAutoResubmitComputerLauncher extends DelegatingComputerLaun
     private static final Logger LOGGER = Logger.getLogger(EC2FleetAutoResubmitComputerLauncher.class.getName());
 
     /**
-     * Delay which will be applied when job {@link Queue#scheduleInternal(Queue.Task, int, List)}
-     * rescheduled after offline
+     * Delay which will be applied when job rescheduled after offline
      */
     private static final int RESCHEDULE_QUIET_PERIOD_SEC = 10;
 

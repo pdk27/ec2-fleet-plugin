@@ -6,7 +6,6 @@ import com.amazon.jenkins.ec2fleet.aws.Registry;
 import com.amazon.jenkins.ec2fleet.aws.fleet.EC2Fleets;
 import com.amazon.jenkins.ec2fleet.aws.fleet.EC2SpotFleet;
 import com.amazon.jenkins.ec2fleet.aws.AwsPermissionChecker;
-import com.amazon.jenkins.ec2fleet.utils.EC2FleetCloudAwareUtils;
 import com.amazon.jenkins.ec2fleet.aws.RegionHelper;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.StackStatus;
@@ -17,7 +16,6 @@ import com.amazonaws.services.ec2.model.KeyPairInfo;
 import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsHelper;
 import hudson.Extension;
 import hudson.model.AbstractProject;
-import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.Label;
@@ -76,21 +74,21 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
     private static final SimpleFormatter sf = new SimpleFormatter();
     private static final Logger LOGGER = Logger.getLogger(EC2FleetLabelCloud.class.getName());
 
-    /**
-     * Provide unique identifier for this instance of {@link EC2FleetLabelCloud}, <code>transient</code>
-     * will not be stored. Not available for customer, instead use {@link EC2FleetLabelCloud#name}
-     * will be used only during Jenkins configuration update <code>config.jelly</code>,
-     * when new instance of same cloud is created and we need to find old instance and
-     * repoint resources like {@link Computer} {@link Node} etc.
-     * <p>
-     * It's lazy to support old versions which don't have this field at all.
-     * <p>
-     * However it's stable, as soon as it will be created and called first uuid will be same
-     * for all future calls to the same instances of lazy uuid.
-     *
-     * @see EC2FleetCloudAware
-     */
-    private transient LazyUuid id;
+//    /**
+//     * Provide unique identifier for this instance of {@link EC2FleetLabelCloud}, <code>transient</code>
+//     * will not be stored. Not available for customer, instead use {@link EC2FleetLabelCloud#name}
+//     * will be used only during Jenkins configuration update <code>config.jelly</code>,
+//     * when new instance of same cloud is created and we need to find old instance and
+//     * repoint resources like {@link Computer} {@link Node} etc.
+//     * <p>
+//     * It's lazy to support old versions which don't have this field at all.
+//     * <p>
+//     * However it's stable, as soon as it will be created and called first uuid will be same
+//     * for all future calls to the same instances of lazy uuid.
+//     *
+//     * @see EC2FleetCloudAware
+//     */
+//    private transient LazyUuid id;
 
     private final String awsCredentialsId;
     private final String region;
@@ -124,7 +122,6 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
 
     @DataBoundConstructor
     public EC2FleetLabelCloud(final String name,
-                              final String oldId,
                               final String awsCredentialsId,
                               final String region,
                               final String endpoint,
@@ -164,11 +161,12 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
         this.noDelayProvision = noDelayProvision;
         this.ec2KeyPairName = ec2KeyPairName;
 
-        if (StringUtils.isNotEmpty(oldId)) {
-            // existent cloud was modified, let's re-assign all dependencies of old cloud instance
-            // to new one
-            EC2FleetCloudAwareUtils.reassign(oldId, this);
-        }
+//        if (StringUtils.isNotEmpty(oldId)) {
+//            // existent cloud was modified, let's re-assign all dependencies of old cloud instance
+//            // to new one
+//            EC2FleetCloudAwareUtils.reassign(oldId, this);
+//        }
+        LOGGER.fine("*** In EC2FleetLabelCloud constructor for " + this.getDisplayName() +  "obj: " + this);
     }
 
     public String getEc2KeyPairName() {
@@ -183,21 +181,21 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
         return awsCredentialsId;
     }
 
-    /**
-     * Called old as will be used by new instance of cloud, for
-     * which this id is old (not current)
-     *
-     * @return id of current cloud
-     */
-    public String getOldId() {
-        return id.getValue();
-    }
+//    /**
+//     * Called old as will be used by new instance of cloud, for
+//     * which this id is old (not current)
+//     *
+//     * @return id of current cloud
+//     */
+//    public String getOldId() {
+//        return id.getValue();
+//    }
 
-    @Override
-    public String getFleet() {
-        // TODO: We need a way to map existing node/computer's cloud reference rather than relying on oldId
-        return null;
-    }
+//    @Override
+//    public String getFleet() {
+//        // TODO: We need a way to map existing node/computer's cloud reference rather than relying on oldId
+//        return null;
+//    }
 
     public boolean isDisableTaskResubmit() {
         return disableTaskResubmit;
@@ -296,6 +294,15 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
 
     @Override
     public synchronized Collection<NodeProvisioner.PlannedNode> provision(@Nonnull final Cloud.CloudState cloudState, int excessWorkload) {
+        Jenkins jenkinsInstance = Jenkins.get();
+        if (jenkinsInstance.isQuietingDown()) {
+            LOGGER.log(Level.FINE, "Not provisioning nodes, Jenkins instance is quieting down");
+            return Collections.emptyList();
+        } else if (jenkinsInstance.isTerminating()) {
+            LOGGER.log(Level.FINE, "Not provisioning nodes, Jenkins instance is terminating");
+            return Collections.emptyList();
+        }
+
         info("excessWorkload %s", excessWorkload);
 
         final Label label = cloudState.getLabel();
@@ -609,7 +616,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
     }
 
     private void init() {
-        id = new LazyUuid();
+//        id = new LazyUuid();
         states = new HashMap<>();
     }
 
@@ -653,11 +660,11 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
         final Node.Mode nodeMode = restrictUsage ? Node.Mode.EXCLUSIVE : Node.Mode.NORMAL;
         //TODO: Add maxTotalUses to EC2FleetLabelCloud similar to EC2FleetCloud
         final EC2FleetNode node = new EC2FleetNode(instanceId, "Fleet agent for " + instanceId,
-                effectiveFsRoot, effectiveNumExecutors, nodeMode, labelString, new ArrayList<NodeProperty<?>>(),
-                this, computerLauncher, -1);
+                effectiveFsRoot, effectiveNumExecutors, nodeMode, labelString, new EC2RetentionStrategy(),
+                new ArrayList<NodeProperty<?>>(), this.name, computerLauncher, -1);
 
         // Initialize our retention strategy
-        node.setRetentionStrategy(new EC2RetentionStrategy());
+//        node.setRetentionStrategy(new EC2RetentionStrategy());
 
         final Jenkins jenkins = Jenkins.get();
         // jenkins automatically remove old node with same name if any
@@ -811,6 +818,11 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
                 }
             }
         }
+    }
+
+    @Override
+    public EC2FleetLabelCloud.DescriptorImpl getDescriptor() {
+        return (EC2FleetLabelCloud.DescriptorImpl) super.getDescriptor();
     }
 
     @Extension

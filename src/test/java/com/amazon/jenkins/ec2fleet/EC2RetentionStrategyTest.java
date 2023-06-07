@@ -2,7 +2,6 @@ package com.amazon.jenkins.ec2fleet;
 
 import hudson.model.Executor;
 import hudson.model.Queue;
-import hudson.slaves.SlaveComputer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SlaveComputer.class)
+@PrepareForTest(EC2FleetNodeComputer.class)
 public class EC2RetentionStrategyTest {
 
     @Mock
@@ -175,7 +174,6 @@ public class EC2RetentionStrategyTest {
         when(cloud.getIdleMinutes()).thenReturn(0);
 
         new EC2RetentionStrategy().check(computer);
-
 
         verify(computer).getNode();
         verify(cloud, never()).scheduleToTerminate(anyString(), anyBoolean(), any(EC2AgentTerminationReason.class));
