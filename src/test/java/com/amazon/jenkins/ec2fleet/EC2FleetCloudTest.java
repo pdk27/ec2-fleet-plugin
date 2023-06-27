@@ -68,6 +68,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -1227,6 +1228,44 @@ public class EC2FleetCloudTest {
         Assert.assertEquals(4, fleetCloud.getStats().getNumDesired());
     }
 
+    /**
+     * For context, see https://github.com/jenkinsci/ec2-fleet-plugin/issues/363
+     */
+    @Test
+    public void update_shouldTerminateIdleInstancesOnly() {
+        // given
+        Node nodeMock1 = mock(Node.class);
+        Node nodeMock2 = mock(Node.class);
+        Computer compMock1 = mock(Computer.class);
+        Computer compMock2 = mock(Computer.class);
+
+        PowerMockito.when(ec2Fleet.getState(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(new FleetStateStats("", 0, FleetStateStats.State.active(),
+                        Collections.<String>emptySet(), Collections.<String, Double>emptyMap()));
+        when(jenkins.getNode("i-0")).thenReturn(nodeMock1);
+        when(jenkins.getNode("i-1")).thenReturn(nodeMock2);
+        doReturn(compMock1).when(nodeMock1).toComputer();
+        doReturn(compMock2).when(nodeMock2).toComputer();
+        doReturn(true).when(compMock1).isIdle();
+        doReturn(false).when(compMock2).isIdle();
+
+        EC2FleetCloud fleetCloud = new EC2FleetCloud(null, null, "credId", null, "region",
+                "", "fleetId", "", null, PowerMockito.mock(ComputerConnector.class), false,
+                false, 0, 0, 10, 0,1, false,
+                true, "-1", false,
+                0, 0, true, 10, false);
+
+        fleetCloud.scheduleToTerminate("i-0", false, EC2AgentTerminationReason.IDLE_FOR_TOO_LONG);
+        fleetCloud.scheduleToTerminate("i-1", true, EC2AgentTerminationReason.MAX_TOTAL_USES_EXHAUSTED);
+
+        // when
+        fleetCloud.update();
+
+        // then
+        verify(ec2Api).terminateInstances(amazonEC2, new HashSet<>(Arrays.asList("i-0")));
+        Assert.assertEquals(Collections.singleton("i-1"), fleetCloud.getStats().getInstances());
+    }
+
     @Test
     public void update_shouldUpdateStateWithMinSpare() throws IOException {
         // given
@@ -1966,6 +2005,58 @@ public class EC2FleetCloudTest {
                 , 0, 0, false,
                 45, false);
         assertEquals(1, ec2FleetCloud.getNumExecutors());
+    }
+
+    @Test
+    public void hasUnlimitedUsesForNodes_shouldReturnTrueWhenUnlimited() {
+        final int maxTotalUses = -1;
+        EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
+                "CloudName", null, null, null, null, null, null,
+                null, null, null, false,
+                false, null, 0, 1, 0,
+                0, true, false, String.valueOf(maxTotalUses), false
+                , 0, 0, false,
+                45, false);
+        assertTrue(ec2FleetCloud.hasUnlimitedUsesForNodes());
+    }
+
+    @Test
+    public void hasUnlimitedUsesForNodes_shouldReturnDefaultTrueForNull() {
+        final String maxTotalUses = null;
+        EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
+                "CloudName", null, null, null, null, null, null,
+                null, null, null, false,
+                false, null, 0, 1, 0,
+                0, true, false, maxTotalUses, false
+                , 0, 0, false,
+                45, false);
+        assertTrue(ec2FleetCloud.hasUnlimitedUsesForNodes());
+    }
+
+    @Test
+    public void hasUnlimitedUsesForNodes_shouldReturnDefaultTrueForEmptyString() {
+        final String maxTotalUses = "";
+        EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
+                "CloudName", null, null, null, null, null, null,
+                null, null, null, false,
+                false, null, 0, 1, 0,
+                0, true, false, maxTotalUses, false
+                , 0, 0, false,
+                45, false);
+        assertTrue(ec2FleetCloud.hasUnlimitedUsesForNodes());
+    }
+
+    @Test
+    public void hasUnlimitedUsesForNodes_shouldReturnFalseWhenLimited() {
+        final int maxTotalUses = 5;
+        EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
+                "CloudName", null, null, null, null, null, null,
+                null, null, null, false,
+                false, null, 0, 1, 0,
+                0, true, false, String.valueOf(maxTotalUses), false
+                , 0, 0, false,
+                45, false);
+        assertFalse(ec2FleetCloud.hasUnlimitedUsesForNodes());
     }
 
     private void mockNodeCreatingPart() {
