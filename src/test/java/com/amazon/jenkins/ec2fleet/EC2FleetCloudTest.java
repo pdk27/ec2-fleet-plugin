@@ -1931,7 +1931,7 @@ public class EC2FleetCloudTest {
                 false, null, 0, 1, 0,
                 1, true, false, "-1", false
                 , 0, 0, false, 10, false);
-        assertEquals(ec2FleetCloud.getDisplayName(), EC2FleetCloud.FLEET_CLOUD_ID);
+        assertEquals(ec2FleetCloud.getDisplayName(), EC2FleetCloud.DEFAULT_FLEET_CLOUD_ID);
     }
 
     @Test
