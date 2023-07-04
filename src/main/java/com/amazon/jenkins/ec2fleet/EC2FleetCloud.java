@@ -1,10 +1,10 @@
 package com.amazon.jenkins.ec2fleet;
 
+import com.amazon.jenkins.ec2fleet.aws.AwsPermissionChecker;
+import com.amazon.jenkins.ec2fleet.aws.RegionHelper;
 import com.amazon.jenkins.ec2fleet.fleet.EC2Fleet;
 import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
-import com.amazon.jenkins.ec2fleet.utils.AwsPermissionChecker;
 import com.amazon.jenkins.ec2fleet.utils.EC2FleetCloudAwareUtils;
-import com.amazon.jenkins.ec2fleet.utils.RegionHelper;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateName;

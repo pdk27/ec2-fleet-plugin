@@ -1,11 +1,12 @@
 package com.amazon.jenkins.ec2fleet;
 
+import com.amazon.jenkins.ec2fleet.aws.EC2Api;
 import com.amazon.jenkins.ec2fleet.fleet.AutoScalingGroupFleet;
 import com.amazon.jenkins.ec2fleet.fleet.EC2Fleet;
 import com.amazon.jenkins.ec2fleet.fleet.EC2Fleets;
 import com.amazon.jenkins.ec2fleet.fleet.EC2SpotFleet;
-import com.amazon.jenkins.ec2fleet.utils.RegionInfo;
-import com.amazon.jenkins.ec2fleet.utils.AwsPermissionChecker;
+import com.amazon.jenkins.ec2fleet.aws.RegionInfo;
+import com.amazon.jenkins.ec2fleet.aws.AwsPermissionChecker;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
