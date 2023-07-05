@@ -1254,7 +1254,7 @@ public class EC2FleetCloudTest {
                         new HashSet<>(Arrays.asList("i-1", "i-2", "i-3")), Collections.<String, Double>emptyMap()));
         mockNodeCreatingPart();
 
-        EC2FleetCloud fleetCloud = new EC2FleetCloud(null, null, "credId", null, "region",
+        EC2FleetCloud fleetCloud = new EC2FleetCloud(null, "credId", null, "region",
                 "", "fleetId", "", null, PowerMockito.mock(ComputerConnector.class), false,
                 false, 0, 0, 2, 0, 1, false,
                 false, "-1", false,
@@ -2025,7 +2025,7 @@ public class EC2FleetCloudTest {
     public void hasUnlimitedUsesForNodes_shouldReturnTrueWhenUnlimited() {
         final int maxTotalUses = -1;
         EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
-                "CloudName", null, null, null, null, null, null,
+                "CloudName", null, null, null, null, null,
                 null, null, null, false,
                 false, null, 0, 1, 0,
                 0, true, false, String.valueOf(maxTotalUses), false
@@ -2038,7 +2038,7 @@ public class EC2FleetCloudTest {
     public void hasUnlimitedUsesForNodes_shouldReturnDefaultTrueForNull() {
         final String maxTotalUses = null;
         EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
-                "CloudName", null, null, null, null, null, null,
+                "CloudName", null, null, null, null, null,
                 null, null, null, false,
                 false, null, 0, 1, 0,
                 0, true, false, maxTotalUses, false
@@ -2051,7 +2051,7 @@ public class EC2FleetCloudTest {
     public void hasUnlimitedUsesForNodes_shouldReturnDefaultTrueForEmptyString() {
         final String maxTotalUses = "";
         EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
-                "CloudName", null, null, null, null, null, null,
+                "CloudName", null, null, null, null, null,
                 null, null, null, false,
                 false, null, 0, 1, 0,
                 0, true, false, maxTotalUses, false
@@ -2064,7 +2064,7 @@ public class EC2FleetCloudTest {
     public void hasUnlimitedUsesForNodes_shouldReturnFalseWhenLimited() {
         final int maxTotalUses = 5;
         EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
-                "CloudName", null, null, null, null, null, null,
+                "CloudName", null, null, null, null, null,
                 null, null, null, false,
                 false, null, 0, 1, 0,
                 0, true, false, String.valueOf(maxTotalUses), false

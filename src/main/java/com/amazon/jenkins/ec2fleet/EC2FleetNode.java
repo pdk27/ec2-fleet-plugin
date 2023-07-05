@@ -10,6 +10,7 @@ import hudson.model.Slave;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
+import hudson.slaves.RetentionStrategy;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -31,42 +32,20 @@ public class EC2FleetNode extends Slave implements EphemeralNode {
     private final int maxTotalUses;
     private int usesRemaining;
 
-    @DataBoundConstructor
-    public EC2FleetNode(final String instanceId,
-                        final String nodeDescription,
-                        final String remoteFS,
-                        final int numExecutors,
-                        final Mode mode,
-                        final String label,
-                        final EC2RetentionStrategy retentionStrategy,
-                        final List<? extends NodeProperty<?>> nodeProperties,
-                        final String cloudName,
-                        ComputerLauncher launcher,
+    public EC2FleetNode(final String instanceId, final String nodeDescription, final String remoteFS, final int numExecutors,
+                        final Mode mode, final String label, final RetentionStrategy retentionStrategy,
+                        final List<? extends NodeProperty<?>> nodeProperties, final String cloudName, ComputerLauncher launcher,
                         final int maxTotalUses) throws IOException, Descriptor.FormException {
-        super(instanceId, remoteFS, launcher);
-
-        setNodeDescription(nodeDescription);
-        setNumExecutors(numExecutors);
-        setMode(mode);
-        setLabelString(label);
-        setRetentionStrategy(retentionStrategy);
-        setNodeProperties(nodeProperties);
-
-        this.instanceId = instanceId;
+        //noinspection deprecation
+//        System.out.println(super.getLabelString());
+        super(instanceId, nodeDescription, remoteFS, numExecutors, mode, label,
+                launcher, retentionStrategy, nodeProperties);
         this.cloudName = cloudName;
         this.maxTotalUses = maxTotalUses;
         this.usesRemaining = maxTotalUses;
 
         LOGGER.fine("*** In EC2FleetNode constructor for " + getDisplayName() + ", " + this);
         LOGGER.fine("cloud: " + getCloud());
-    }
-
-    public String getCloudName() {
-        return cloudName;
-    }
-
-    public void setCloudName(String cloudName) {
-        this.cloudName = cloudName;
     }
 
     public String getInstanceId() {
