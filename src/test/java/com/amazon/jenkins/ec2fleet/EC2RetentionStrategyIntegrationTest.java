@@ -68,12 +68,6 @@ public class EC2RetentionStrategyIntegrationTest extends IntegrationTest {
                                 instance, instance1
                         )));
         when(amazonEC2.terminateInstances(any(TerminateInstancesRequest.class))).thenReturn(new TerminateInstancesResult());
-
-        DescribeSpotFleetRequestsResult describeSpotFleetRequestsResult = new DescribeSpotFleetRequestsResult();
-        describeSpotFleetRequestsResult.setNextToken(null);
-        describeSpotFleetRequestsResult.setSpotFleetRequestConfigs(null);
-        when(amazonEC2.describeSpotFleetRequests(any(DescribeSpotFleetRequestsRequest.class)))
-                .thenReturn(describeSpotFleetRequestsResult);
     }
 
     @Test
