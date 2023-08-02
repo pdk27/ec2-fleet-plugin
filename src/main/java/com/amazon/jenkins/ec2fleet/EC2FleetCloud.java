@@ -73,7 +73,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
     public static final String EC2_INSTANCE_TAG_NAMESPACE = "ec2-fleet-plugin";
     public static final String EC2_INSTANCE_CLOUD_NAME_TAG = EC2_INSTANCE_TAG_NAMESPACE + ":cloud-name";
 
-    public static final String DEFAULT_FLEET_CLOUD_ID = "FleetCloud";
+    public static final String DEFAULT_FLEET_CLOUD_NAME = "FleetCloud";
 
     public static final int DEFAULT_CLOUD_STATUS_INTERVAL_SEC = 10;
 
@@ -188,7 +188,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
                          final boolean scaleExecutorsByWeight,
                          final Integer cloudStatusIntervalSec,
                          final boolean noDelayProvision) {
-        super(EC2FleetCloudUtil.getValidName(DEFAULT_FLEET_CLOUD_ID, name));
+        super(name);
         init();
         this.credentialsId = credentialsId;
         this.awsCredentialsId = awsCredentialsId;
@@ -958,12 +958,18 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             return FormValidation.error("Maximum Total Uses must be greater or equal to -1");
         }
 
-        public FormValidation doCheckName(@QueryParameter final String name) {
+        public FormValidation doCheckName(@QueryParameter final String name, @QueryParameter final String isNewCloud) {
             try {
                 Jenkins.checkGoodName(name);
             } catch (Failure e) {
                 return FormValidation.error(e.getMessage());
             }
+
+            // check if name is unique
+            if (Boolean.valueOf(isNewCloud) && !CloudUtil.isCloudNameUnique(name)) {
+                return FormValidation.error("Please choose a unique name. Existing clouds: " + Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.joining(",")));
+            }
+
             return FormValidation.ok();
         }
 
@@ -985,6 +991,10 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             }
 
             return model;
+        }
+
+        public String getDefaultCloudName() {
+            return CloudUtil.getUniqueCloudName(DEFAULT_FLEET_CLOUD_NAME);
         }
 
         public FormValidation doCheckFleet(@QueryParameter final String fleet) {

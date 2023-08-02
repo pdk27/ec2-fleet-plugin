@@ -1961,7 +1961,7 @@ public class EC2FleetCloudTest {
                 false, null, 0, 1, 0,
                 1, true, false, "-1", false
                 , 0, 0, false, 10, false);
-        assertEquals(ec2FleetCloud.getDisplayName(), EC2FleetCloud.DEFAULT_FLEET_CLOUD_ID);
+        assertEquals(ec2FleetCloud.getDisplayName(), EC2FleetCloud.DEFAULT_FLEET_CLOUD_NAME);
     }
 
     @Test
@@ -2100,6 +2100,19 @@ public class EC2FleetCloudTest {
                 , 0, 0, false,
                 45, false);
         assertFalse(ec2FleetCloud.hasUnlimitedUsesForNodes());
+    }
+
+    @Test
+    public void descriptorImpl_getDefaultCloudName_returnNameWithSuffix() {
+        AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
+        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2Client);
+
+        ListBoxModel r = new EC2FleetCloud.DescriptorImpl().doFillRegionItems("");
+        HashSet<String> staticRegions = new HashSet<>(RegionInfo.getRegionNames());
+        staticRegions.addAll(RegionUtils.getRegions().stream().map(com.amazonaws.regions.Region::getName).collect(Collectors.toSet()));
+
+        Assert.assertThat(staticRegions.size(), Matchers.greaterThan(0));
+        assertEquals(staticRegions.size(), r.size());
     }
 
     private void mockNodeCreatingPart() {
