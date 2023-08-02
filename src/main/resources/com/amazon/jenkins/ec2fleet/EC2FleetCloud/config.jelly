@@ -5,7 +5,7 @@
          xmlns:c="/lib/credentials">
 
     <f:invisibleEntry>
-        <input type="hidden" name="isNewCloud" value="${instance == null ? true : false}"/>
+        <input type="hidden" name="isNewCloud" value="${instance == null ? 'true' : 'false'}"/>
     </f:invisibleEntry>
 
     <f:description>A unique name for this EC2 Fleet cloud</f:description>
@@ -14,7 +14,6 @@
     <f:entry title="${%Name}" field="name">
         <j:choose>
             <j:when test="${instance != null}">
-<!--                <j:set var="readOnlyMode" value="true"/>-->
                 <f:readOnlyTextbox/>
             </j:when>
             <j:otherwise>
