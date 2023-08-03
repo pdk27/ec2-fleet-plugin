@@ -188,7 +188,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
                          final boolean scaleExecutorsByWeight,
                          final Integer cloudStatusIntervalSec,
                          final boolean noDelayProvision) {
-        super(StringUtils.isBlank(name) ? DEFAULT_FLEET_CLOUD_ID : name);
+        super(name);
         init();
         this.credentialsId = credentialsId;
         this.awsCredentialsId = awsCredentialsId;
@@ -991,6 +991,14 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             }
 
             return model;
+        }
+
+        public String getDefaultCloudName() {
+            final List<String> jCloudNames = Jenkins.get().clouds != null
+                    ? Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.toList())
+                    : Collections.emptyList();
+
+            return CloudUtil.getUniqDefaultCloudName(jCloudNames, DEFAULT_FLEET_CLOUD_ID);
         }
 
         public FormValidation doCheckFleet(@QueryParameter final String fleet) {

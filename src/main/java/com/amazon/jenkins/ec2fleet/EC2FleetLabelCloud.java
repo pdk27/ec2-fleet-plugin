@@ -125,7 +125,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
                               final Integer cloudStatusIntervalSec,
                               final boolean noDelayProvision,
                               final String ec2KeyPairName) {
-        super(StringUtils.isBlank(name) ? DEFAULT_FLEET_CLOUD_ID : name);
+        super(name);
         init();
         this.awsCredentialsId = awsCredentialsId;
         this.region = region;
@@ -865,6 +865,20 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
             }
 
             return FormValidation.ok();
+        }
+
+        public String getDefaultCloudName() {
+            final List<String> jCloudNames = Jenkins.get().clouds != null
+                    ? Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.toList())
+                    : Collections.emptyList();
+
+            String uniqName = DEFAULT_FLEET_CLOUD_ID;
+            int suffix = 1;
+            while (jCloudNames.contains(uniqName)) {
+                uniqName = DEFAULT_FLEET_CLOUD_ID + "-" + suffix++;
+            }
+
+            return uniqName;
         }
 
         @Override
