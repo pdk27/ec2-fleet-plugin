@@ -16,6 +16,7 @@ import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsHelper;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.model.Failure;
 import hudson.model.Item;
 import hudson.model.Label;
 import hudson.model.Node;
@@ -51,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.stream.Collectors;
 
 /**
  * @see CloudNanny
@@ -848,6 +850,21 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
             final String errorMessage = String.format("Following AWS permissions are missing: %s ", String.join(", ", missingPermissions));
             LOGGER.log(Level.WARNING, String.format("[TestConnection] %s", errorMessage));
             return FormValidation.error(String.format("%s %n %s", errorMessage, disclaimer));
+        }
+
+        public FormValidation doCheckName(@QueryParameter final String name, @QueryParameter final String isNewCloud) {
+            try {
+                Jenkins.checkGoodName(name);
+            } catch (Failure e) {
+                return FormValidation.error(e.getMessage());
+            }
+
+            // check if name is unique
+            if (Boolean.valueOf(isNewCloud) && !CloudUtil.isCloudNameUnique(name)) {
+                return FormValidation.error("Please choose a unique name. Existing clouds: " + Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.joining(",")));
+            }
+
+            return FormValidation.ok();
         }
 
         @Override

@@ -958,12 +958,18 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
             return FormValidation.error("Maximum Total Uses must be greater or equal to -1");
         }
 
-        public FormValidation doCheckName(@QueryParameter final String name) {
+        public FormValidation doCheckName(@QueryParameter final String name, @QueryParameter final String isNewCloud) {
             try {
                 Jenkins.checkGoodName(name);
             } catch (Failure e) {
                 return FormValidation.error(e.getMessage());
             }
+
+            // check if name is unique
+            if (Boolean.valueOf(isNewCloud) && !CloudUtil.isCloudNameUnique(name)) {
+                return FormValidation.error("Please choose a unique name. Existing clouds: " + Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.joining(",")));
+            }
+
             return FormValidation.ok();
         }
 
