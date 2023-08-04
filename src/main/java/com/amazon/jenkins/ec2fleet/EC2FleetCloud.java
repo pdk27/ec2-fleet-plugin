@@ -163,7 +163,7 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
     private transient AtomicInteger plannedNodeCounter = new AtomicInteger(1);
 
     @DataBoundConstructor
-    public EC2FleetCloud(final String name,
+    public EC2FleetCloud(@Nonnull final String name,
                          final String awsCredentialsId,
                          final @Deprecated String credentialsId,
                          final String region,
