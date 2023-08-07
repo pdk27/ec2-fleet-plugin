@@ -860,7 +860,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
             }
 
             // check if name is unique
-            if (Boolean.valueOf(isNewCloud) && !CloudUtil.isCloudNameUnique(name)) {
+            if (Boolean.valueOf(isNewCloud) && !CloudNames.isUnique(name)) {
                 return FormValidation.error("Please choose a unique name. Existing clouds: " + Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.joining(",")));
             }
 
@@ -868,17 +868,7 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
         }
 
         public String getDefaultCloudName() {
-            final List<String> jCloudNames = Jenkins.get().clouds != null
-                    ? Jenkins.get().clouds.stream().map(c -> c.name).collect(Collectors.toList())
-                    : Collections.emptyList();
-
-            String uniqName = DEFAULT_FLEET_CLOUD_ID;
-            int suffix = 1;
-            while (jCloudNames.contains(uniqName)) {
-                uniqName = DEFAULT_FLEET_CLOUD_ID + "-" + suffix++;
-            }
-
-            return uniqName;
+            return CloudNames.generateUnique(DEFAULT_FLEET_CLOUD_ID);
         }
 
         @Override
@@ -887,7 +877,5 @@ public class EC2FleetLabelCloud extends AbstractEC2FleetCloud {
             save();
             return super.configure(req, formData);
         }
-
     }
-
 }
