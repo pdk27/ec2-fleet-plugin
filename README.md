@@ -33,6 +33,11 @@ and terminating idle instances that breach that criteria or those in your Jenkin
 Use Auto Scaling Groups instead.
 
 # Features
+Minimum Jenkins version: 2.277.2
+
+> [!NOTE]
+> [Jenkins version 2.403](https://github.com/jenkinsci/jenkins/releases/tag/jenkins-2.403) includes [significant changes to cloud management](https://issues.jenkins.io/browse/JENKINS-70729).
+> If you are using that version, and see unexpected behavior, create an issue and let us know. 
 
 - Supports EC2 Spot Fleet or Auto Scaling Group as Jenkins Workers
 - Supports all features provided by EC2 Spot Fleet or Auto Scaling Groups e.g. [multiple instance types across Spot and On-Demand](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html#allocation-strategies)
