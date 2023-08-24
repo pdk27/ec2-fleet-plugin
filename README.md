@@ -251,7 +251,6 @@ EC2FleetCloud ec2FleetCloud = new EC2FleetCloud(
   "", // fleetCloudName
   null,
   awsCredentials.id,
-  "",
   config.region,
   "",
   config.fleetId,
